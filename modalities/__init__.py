@@ -23,15 +23,18 @@ Example usage:
     print(Modality.VIDEO in Modality)  # Outputs: True
 """
 
+__all__ = ["Modality", "add_modality"]
+
 from enum import Enum
 from typing import Any
 from aenum import extend_enum
 import pytest
 
+
 class Modality(Enum):
     """
     An enum class representing different modalities.
-    
+
     Attributes:
         IMAGE (str): Represents the 'image' modality.
         TEXT (str): Represents the 'text' modality.
@@ -39,6 +42,7 @@ class Modality(Enum):
         MULTIMODAL (str): Represents the 'multimodal' modality.
         INVALID (None): Represents an invalid modality.
     """
+
     IMAGE = "image"
     TEXT = "text"
     AUDIO = "audio"
@@ -63,6 +67,7 @@ class Modality(Enum):
                 return modality
         return Modality.INVALID
 
+
 def add_modality(name: str, value: Any):
     """
     Dynamically adds a new modality to the Modality enum.
@@ -73,29 +78,45 @@ def add_modality(name: str, value: Any):
 
     Raises:
         ValueError: If the modality name or value already exists.
-    
+
     Example:
         add_modality("VIDEO", "video")
         print(Modality.from_str("video"))  # Outputs: Modality.VIDEO
     """
     lower_name = name.lower()
     lower_value = value.lower() if isinstance(value, str) else value
-    if lower_name in Modality.__members__ or any(mod.value == lower_value for mod in Modality):
+    if lower_name in Modality.__members__ or any(
+        mod.value == lower_value for mod in Modality
+    ):
         raise ValueError(f"'{name}' or value '{value}' already exists as a modality.")
     extend_enum(Modality, name, value)
 
 
 def test_predefined_modalities():
-    assert Modality.from_str("image") == Modality.IMAGE, "Failed to match 'image' to Modality.IMAGE"
-    assert Modality.from_str("text") == Modality.TEXT, "Failed to match 'text' to Modality.TEXT"
-    assert Modality.from_str("audio") == Modality.AUDIO, "Failed to match 'audio' to Modality.AUDIO"
-    assert Modality.from_str("multimodal") == Modality.MULTIMODAL, "Failed to match 'multimodal' to Modality.MULTIMODAL"
-    assert Modality.from_str("unknown") == Modality.INVALID, "Failed to match 'unknown' to Modality.INVALID"
+    assert (
+        Modality.from_str("image") == Modality.IMAGE
+    ), "Failed to match 'image' to Modality.IMAGE"
+    assert (
+        Modality.from_str("text") == Modality.TEXT
+    ), "Failed to match 'text' to Modality.TEXT"
+    assert (
+        Modality.from_str("audio") == Modality.AUDIO
+    ), "Failed to match 'audio' to Modality.AUDIO"
+    assert (
+        Modality.from_str("multimodal") == Modality.MULTIMODAL
+    ), "Failed to match 'multimodal' to Modality.MULTIMODAL"
+    assert (
+        Modality.from_str("unknown") == Modality.INVALID
+    ), "Failed to match 'unknown' to Modality.INVALID"
+
 
 def test_add_user_modality():
     add_modality("VIDEO", "video")
-    assert Modality.from_str("video") == Modality.VIDEO, "Failed to match 'video' to dynamically added Modality.VIDEO"
+    assert (
+        Modality.from_str("video") == Modality.VIDEO
+    ), "Failed to match 'video' to dynamically added Modality.VIDEO"
     assert Modality.VIDEO in Modality, "'video' not found in Modality enum after adding"
+
 
 def test_add_duplicate_modality():
     with pytest.raises(ValueError, match="already exists as a modality"):
@@ -103,17 +124,30 @@ def test_add_duplicate_modality():
     with pytest.raises(ValueError, match="already exists as a modality"):
         add_modality("VIDEO", "video")
 
+
 def test_invalid_modality():
-    assert Modality.from_str("invalid") == Modality.INVALID, "Failed to match 'invalid' to Modality.INVALID"
+    assert (
+        Modality.from_str("invalid") == Modality.INVALID
+    ), "Failed to match 'invalid' to Modality.INVALID"
+
 
 def test_case_insensitivity():
-    assert Modality.from_str("IMAGE") == Modality.IMAGE, "Failed to match 'IMAGE' to Modality.IMAGE (case-insensitive)"
-    assert Modality.from_str("Text") == Modality.TEXT, "Failed to match 'Text' to Modality.TEXT (case-insensitive)"
+    assert (
+        Modality.from_str("IMAGE") == Modality.IMAGE
+    ), "Failed to match 'IMAGE' to Modality.IMAGE (case-insensitive)"
+    assert (
+        Modality.from_str("Text") == Modality.TEXT
+    ), "Failed to match 'Text' to Modality.TEXT (case-insensitive)"
+
 
 def test_new_modality():
     add_modality("NEWMODALITY", "newmodality")
-    assert Modality.from_str("newmodality") == Modality.NEWMODALITY, "Failed to match 'newmodality' to dynamically added Modality.NEWMODALITY"
-    assert Modality.NEWMODALITY in Modality, "'newmodality' not found in Modality enum after adding"
+    assert (
+        Modality.from_str("newmodality") == Modality.NEWMODALITY
+    ), "Failed to match 'newmodality' to dynamically added Modality.NEWMODALITY"
+    assert (
+        Modality.NEWMODALITY in Modality
+    ), "'newmodality' not found in Modality enum after adding"
 
 
 # Example usage

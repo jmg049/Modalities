@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Modalities"
+version = "0.1.0"
+requires-python = ">=3.10"
+description = "This module defines the `Modality` enum class, which represents different types of modalities and provides functionality for adding new modalities dynamically."
+authors = [
+    { name="Jack Geraghty (jmg049)", email="jgeraghty094@gmail.com" }
+]
+dependencies = [
+    "aenum>=3.1.7"
+]
+
+[project.optional-dependencies]
+testing = [
+    "pytest"
+]
