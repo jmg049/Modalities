@@ -1,56 +1,28 @@
-# Modality Enum
+import sys
 
-This module defines the `Modality` enum class, which represents different types of modalities and provides functionality for combining modalities and adding new ones dynamically.
+sys.path.append("..")
 
-### Why use it?
-Across multimodal literature and specifically within the implementations of multimodal models and methods, there is no consistency in matching and acting based on particular modalities. Instead, what we see, is lots the below code block,
-
-```python
-if modality == "audio" ...
-if modality = "t" ...
-if modality == "it" ...
-## vs
-if modality == Modality.AUDIO ...
-if modality == Modality.TEXT ...
-add_modality("IMAGE_TEXT", Modality.VIDEO | Modality.TEXT) ## required setup
-
-if modality == Modality.IMAGE_TEXT ...
-## OR
-if modality == Modality.IMAGE | Modality.TEXT ... ## important to not read this as IMAGE or TEXT, but as IMAGE and TEXT. It performs a bitwise OR operation, not the logical OR operation.
-```
-where modalities are matched on string literals. This can be easy to misuse (depending on how the code parses the modality) and generally could be conveyed in a more uniform and programmatic way. By representing a modality programmatically we can match modalities or combinations easily using native python syntax, allow for functionality to be extended since enums are just classes, catch errors early and more robustly since the Modality enum will fail on invalid modalities, and also there are simply much more verbose and descriptive. 
+from modalities import Modality, add_modality
 
 
-## Installation
+def process_modality(mod):
+    match mod:
+        case Modality.INVALID:
+            return "Invalid modality"
+        case Modality.IMAGE | Modality.TEXT:
+            return f"Processing image and text: {mod}"
+        case Modality.AUDIO | Modality.TEXT:
+            return f"Processing audio and text: {mod}"
+        case Modality.IMAGE:
+            return f"Processing image only: {mod}"
+        case Modality.TEXT:
+            return f"Processing text only: {mod}"
+        case Modality.VIDEO:
+            return f"Processing video: {mod}"
+        case _:
+            return f"Processing other combination: {mod}"
 
-As there already exists a project on PyPi with the name `modalities`, this project is not currently published on PyPI. You can install it directly from the GitHub repository:
 
-```bash
-git clone https://github.com/jmg049/Modalities.git && pip install ./Modalities
-```
-
-## Overview
-
-The `Modality` enum class is based on `IntFlag` and includes predefined modalities such as 'IMAGE', 'TEXT', 'AUDIO', and 'MULTIMODAL'. It supports combining modalities using bitwise operations and adding new user-defined modalities.
-
-### Classes
-
-- **Modality**: An `IntFlag`-based enum class representing different modalities.
-
-### Methods
-
-- **Modality.from_str(s: str) -> Modality**: Converts a string to the corresponding Modality enum member or combination.
-- **Modality.__str__() -> str**: Returns a string representation of the Modality.
-- **Modality.__or__(other: Modality) -> Modality**: Combines two Modality instances using bitwise OR.
-- **Modality.__add__(other: Modality) -> Modality**: Alias for `__or__`, allowing use of the `+` operator.
-
-### Functions
-
-- **add_modality(name: str, combination: Optional[Modality] = None) -> Modality**: Dynamically adds a new modality to the Modality enum.
-
-## Example Usage
-
-```python
 if __name__ == "__main__":
     # Test basic modality combinations
     print(str(Modality.IMAGE | Modality.TEXT))  # Should print: IMAGE_TEXT
@@ -122,7 +94,3 @@ if __name__ == "__main__":
         )  # This should raise an error
     except ValueError as e:
         print(f"Caught expected error: {e}")
-
-```
-
-For more detailed usage and examples, refer to the documentation in the source code.

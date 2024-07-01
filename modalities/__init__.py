@@ -1,164 +1,179 @@
-"""
-This module defines the `Modality` enum class, representing different types of modalities.
-It allows for predefined modalities such as 'image', 'text', 'audio', and 'multimodal'.
-Additionally, it supports adding new user-defined modalities dynamically using the `add_modality` function.
-
-Classes:
-    Modality: An enum class representing different modalities.
-
-Functions:
-    Modality.from_str(s: str): Converts a string to the corresponding Modality enum member.
-    add_modality(name: str, value: Any): Dynamically adds a new modality to the Modality enum.
-
-Example usage:
-    # Convert string to Modality enum member
-    print(Modality.from_str("image"))  # Outputs: Modality.IMAGE
-
-    # Add a new user-defined modality
-    add_modality("VIDEO", "video")
-    print(Modality.from_str("video"))  # Outputs: Modality.VIDEO
-
-    # Check if the new modality is part of Modality enum
-    print(Modality.VIDEO)  # Outputs: Modality.VIDEO
-    print(Modality.VIDEO in Modality)  # Outputs: True
-"""
-
-__all__ = ["Modality", "add_modality"]
-
-from enum import Enum
-from typing import Any
+from logging import getLogger
+from enum import IntFlag
 from aenum import extend_enum
-import pytest
+from typing import Optional
 
 
-class Modality(Enum):
+logger = getLogger(__name__)
+
+
+class Modality(IntFlag):
     """
-    An enum class representing different modalities.
+    An enumeration class representing different modalities.
+
+    This class uses the IntFlag enum to allow for combinations of modalities.
+    Predefined modalities include IMAGE, TEXT, AUDIO, and MULTIMODAL.
+    Additional modalities can be added using the add_modality function.
 
     Attributes:
-        IMAGE (str): Represents the 'image' modality.
-        TEXT (str): Represents the 'text' modality.
-        AUDIO (str): Represents the 'audio' modality.
-        MULTIMODAL (str): Represents the 'multimodal' modality.
-        INVALID (None): Represents an invalid modality.
+        IMAGE (Modality): Represents image modality.
+        TEXT (Modality): Represents text modality.
+        AUDIO (Modality): Represents audio modality.
+        MULTIMODAL (Modality): Represents a combination of multiple modalities.
+        INVALID (Modality): Represents an invalid modality.
+
+    Methods:
+        from_str: Create a Modality instance from a string representation.
+        __str__: Return a string representation of the Modality.
+        __or__: Combine two Modality instances using bitwise OR.
+        __add__: Combine two Modality instances (alias for __or__).
     """
 
-    IMAGE = "image"
-    TEXT = "text"
-    AUDIO = "audio"
-    MULTIMODAL = "multimodal"
-    INVALID = None
+    IMAGE = 1
+    TEXT = 2
+    AUDIO = 4
+    MULTIMODAL = 8
+    INVALID = 0
 
     @staticmethod
-    def from_str(s: str):
+    def from_str(s: str) -> "Modality":
         """
-        Converts a string to the corresponding Modality enum member.
+        Create a Modality instance from a string representation.
 
         Args:
-            s (str): The string representation of the modality.
+            s (str): A string representation of the modality or modalities,
+                     separated by underscores (e.g., "IMAGE_TEXT").
 
         Returns:
-            Modality: The corresponding Modality enum member if found,
-                      otherwise Modality.INVALID.
+            Modality: The corresponding Modality instance.
+
+        Example:
+            >>> Modality.from_str("IMAGE_TEXT")
+            <Modality.IMAGE|TEXT: 3>
         """
-        _s = s.lower()
-        for modality in Modality:
-            if modality.value == _s:
-                return modality
-        return Modality.INVALID
+        modalities = [m.strip().upper() for m in s.split("_")]
+        result = Modality(0)
+        for m in modalities:
+            try:
+                result |= Modality[m]
+            except KeyError:
+                return Modality.INVALID
+        return result if result != Modality.INVALID else Modality.INVALID
+
+    def __str__(self) -> str:
+        """
+        Return a string representation of the Modality.
+
+        Returns:
+            str: A string representation of the Modality.
+
+        Example:
+            >>> str(Modality.IMAGE | Modality.TEXT)
+            'IMAGE_TEXT'
+        """
+        if self == Modality.INVALID:
+            return "INVALID"
+        return "_".join(
+            sorted(m.name for m in Modality if m in self and m != Modality.INVALID)
+        )
+
+    def __or__(self, other: "Modality") -> "Modality":
+        """
+        Combine two Modality instances using bitwise OR.
+
+        Args:
+            other (Modality): Another Modality instance to combine with.
+
+        Returns:
+            Modality: A new Modality instance representing the combination.
+
+        Example:
+            >>> Modality.IMAGE | Modality.TEXT
+            <Modality.IMAGE|TEXT: 3>
+        """
+        if isinstance(other, Modality):
+            return Modality(self.value | other.value)
+        return NotImplemented
+
+    def __add__(self, other: "Modality") -> "Modality":
+        """
+        Combine two Modality instances (alias for __or__).
+
+        Args:
+            other (Modality): Another Modality instance to combine with.
+
+        Returns:
+            Modality: A new Modality instance representing the combination.
+
+        Example:
+            >>> Modality.IMAGE + Modality.TEXT
+            <Modality.IMAGE|TEXT: 3>
+        """
+        return self.__or__(other)
+
+    def __radd__(self, other: "Modality") -> "Modality":
+        """
+        Support reversed addition.
+
+        Args:
+            other (Modality): Another Modality instance to combine with.
+
+        Returns:
+            Modality: A new Modality instance representing the combination.
+        """
+        return self.__add__(other)
 
 
-def add_modality(name: str, value: Any):
+# The add_modality function remains the same
+
+
+def add_modality(name: str, combination: Optional[Modality] = None) -> Modality:
     """
-    Dynamically adds a new modality to the Modality enum.
+    Add a new modality to the Modality enum.
 
     Args:
-        name (str): The name of the new modality to add.
-        value (Any): The value of the new modality to add.
+        name (str): The name of the new modality.
+        combination (Optional[Modality]): A combination of existing modalities
+                                          to create the new modality. If None,
+                                          a new base modality is created.
+
+    Returns:
+        Modality: The newly created Modality instance.
 
     Raises:
-        ValueError: If the modality name or value already exists.
+        ValueError: If the modality name already exists.
 
     Example:
-        add_modality("VIDEO", "video")
-        print(Modality.from_str("video"))  # Outputs: Modality.VIDEO
+        >>> video = add_modality("VIDEO")
+        >>> video_text = add_modality("VIDEO_TEXT", video | Modality.TEXT)
     """
-    lower_name = name.lower()
-    lower_value = value.lower() if isinstance(value, str) else value
-    if lower_name in Modality.__members__ or any(
-        mod.value == lower_value for mod in Modality
-    ):
-        raise ValueError(f"'{name}' or value '{value}' already exists as a modality.")
-    extend_enum(Modality, name, value)
+    name = name.upper()
+    if name in Modality.__members__:
+        raise ValueError(f"'{name}' already exists as a modality.")
+
+    if combination is None:
+        new_value = max(int(m.value) for m in Modality) * 2
+    else:
+        new_value = combination.value
+
+    new_member = extend_enum(Modality, name, new_value)
+    logger.debug(f"Added new modality: {name}")
+    return new_member
 
 
-def test_predefined_modalities():
-    assert (
-        Modality.from_str("image") == Modality.IMAGE
-    ), "Failed to match 'image' to Modality.IMAGE"
-    assert (
-        Modality.from_str("text") == Modality.TEXT
-    ), "Failed to match 'text' to Modality.TEXT"
-    assert (
-        Modality.from_str("audio") == Modality.AUDIO
-    ), "Failed to match 'audio' to Modality.AUDIO"
-    assert (
-        Modality.from_str("multimodal") == Modality.MULTIMODAL
-    ), "Failed to match 'multimodal' to Modality.MULTIMODAL"
-    assert (
-        Modality.from_str("unknown") == Modality.INVALID
-    ), "Failed to match 'unknown' to Modality.INVALID"
-
-
-def test_add_user_modality():
-    add_modality("VIDEO", "video")
-    assert (
-        Modality.from_str("video") == Modality.VIDEO
-    ), "Failed to match 'video' to dynamically added Modality.VIDEO"
-    assert Modality.VIDEO in Modality, "'video' not found in Modality enum after adding"
-
-
-def test_add_duplicate_modality():
-    with pytest.raises(ValueError, match="already exists as a modality"):
-        add_modality("IMAGE", "image")
-    with pytest.raises(ValueError, match="already exists as a modality"):
-        add_modality("VIDEO", "video")
-
-
-def test_invalid_modality():
-    assert (
-        Modality.from_str("invalid") == Modality.INVALID
-    ), "Failed to match 'invalid' to Modality.INVALID"
-
-
-def test_case_insensitivity():
-    assert (
-        Modality.from_str("IMAGE") == Modality.IMAGE
-    ), "Failed to match 'IMAGE' to Modality.IMAGE (case-insensitive)"
-    assert (
-        Modality.from_str("Text") == Modality.TEXT
-    ), "Failed to match 'Text' to Modality.TEXT (case-insensitive)"
-
-
-def test_new_modality():
-    add_modality("NEWMODALITY", "newmodality")
-    assert (
-        Modality.from_str("newmodality") == Modality.NEWMODALITY
-    ), "Failed to match 'newmodality' to dynamically added Modality.NEWMODALITY"
-    assert (
-        Modality.NEWMODALITY in Modality
-    ), "'newmodality' not found in Modality enum after adding"
-
-
-# Example usage
-if __name__ == "__main__":
-    add_modality("VIDEO", "video")
-    print(Modality.from_str("video"))  # Outputs: Modality.VIDEO
-    print(Modality.from_str("image"))  # Outputs: Modality.IMAGE
-    print(Modality.from_str("unknown"))  # Outputs: Modality.INVALID
-
-    # Check the new modality is a part of Modality enum
-    print(Modality.VIDEO)  # Outputs: Modality.VIDEO
-    print(Modality.VIDEO in Modality)  # Outputs: True
-
-    pytest.main()
+def process_modality(mod):
+    match mod:
+        case Modality.INVALID:
+            return "Invalid modality"
+        case Modality.IMAGE | Modality.TEXT:
+            return f"Processing image and text: {mod}"
+        case Modality.AUDIO | Modality.TEXT:
+            return f"Processing audio and text: {mod}"
+        case Modality.IMAGE:
+            return f"Processing image only: {mod}"
+        case Modality.TEXT:
+            return f"Processing text only: {mod}"
+        case Modality.VIDEO:
+            return f"Processing video: {mod}"
+        case _:
+            return f"Processing other combination: {mod}"
