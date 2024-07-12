@@ -1,15 +1,16 @@
 from logging import getLogger
 from enum import IntFlag
-from aenum import extend_enum
-from typing import Optional
+from typing import Union, List, Optional
 
+import numpy as np
+from aenum import extend_enum
 
 logger = getLogger(__name__)
 
 
 class Modality(IntFlag):
     """
-    An enumeration class representing different modalities.
+    An enumepct_missingn class representing different modalities.
 
     This class uses the IntFlag enum to allow for combinations of modalities.
     Predefined modalities include IMAGE, TEXT, AUDIO, and MULTIMODAL.
@@ -124,9 +125,6 @@ class Modality(IntFlag):
         return self.__add__(other)
 
 
-# The add_modality function remains the same
-
-
 def add_modality(name: str, combination: Optional[Modality] = None) -> Modality:
     """
     Add a new modality to the Modality enum.
@@ -177,3 +175,68 @@ def process_modality(mod):
             return f"Processing video: {mod}"
         case _:
             return f"Processing other combination: {mod}"
+
+
+def create_missing_mask(
+    n: int, m: int, pct_missing: Union[float, List[float], np.ndarray]
+) -> np.ndarray:
+    """
+    Generate a mask representing missing data across multiple modalities and samples.
+
+    This function creates a binary mask where 1.0 indicates present data and 0.0 indicates missing data.
+    The proportion of missing data for each modality is controlled by the 'pct_missing' parameter.
+
+    Parameters:
+    -----------
+    n : int
+        The number of modalities (columns in the mask).
+    m : int
+        The number of samples (rows in the mask).
+    pct_missing : Union[float, List[float], np.ndarray]
+        The pct_missing of missing data for each modality. If a single float, the same pct_missing is applied to all modalities.
+        If a list or array, it should contain n elements, one for each modality.
+
+    Returns:
+    --------
+    np.ndarray
+        A binary mask of shape (m, n) where:
+        - 1.0 indicates present data
+        - 0.0 indicates missing data
+
+    Raises:
+    -------
+    AssertionError
+        If any pct_missing value is not between 0.0 and 1.0.
+
+    Example:
+    --------
+    >>> np.random.seed(42)  # For reproducibility
+    >>> create_missing_mask(3, 10, [0.3, 0.4, 0.5])
+    array([[1., 1., 0.],
+           [1., 1., 0.],
+           [1., 0., 1.],
+           [1., 0., 0.],
+           [1., 1., 0.],
+           [0., 0., 0.],
+           [1., 1., 0.],
+           [1., 0., 0.],
+           [0., 1., 1.],
+           [1., 0., 0.]])
+    """
+    if isinstance(pct_missing, (float, int)):
+        pct_missing = [pct_missing] * n
+
+    assert all(
+        0.0 <= r <= 1.0 for r in pct_missing
+    ), "All pct_missings must be between 0.0 and 1.0"
+    assert (
+        len(pct_missing) == n
+    ), f"Length of pct_missing ({len(pct_missing)}) must match the number of modalities ({n})"
+
+    mask = np.ones((m, n))
+    for i in range(n):
+        missing_count = int(m * pct_missing[i])
+        masked_indices = np.random.choice(m, size=missing_count, replace=False)
+        mask[masked_indices, i] = 0.0
+
+    return mask

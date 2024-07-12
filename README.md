@@ -1,6 +1,6 @@
 # Modality Enum
 
-This module defines the `Modality` enum class, which represents different types of modalities and provides functionality for combining modalities and adding new ones dynamically.
+This module defines the `Modality` enum class, which represents different types of modalities and provides functionality for combining modalities and adding new ones dynamically. It also includes utility functions for working with modalities.
 
 ### Why use it?
 Across multimodal literature and specifically within the implementations of multimodal models and methods, there is no consistency in matching and acting based on particular modalities. Instead, what we see, is lots the below code block,
@@ -30,8 +30,13 @@ git clone https://github.com/jmg049/Modalities.git && pip install ./Modalities
 ```
 
 ## Overview
-
 The `Modality` enum class is based on `IntFlag` and includes predefined modalities such as 'IMAGE', 'TEXT', 'AUDIO', and 'MULTIMODAL'. It supports combining modalities using bitwise operations and adding new user-defined modalities.
+
+---
+*Disclaimer: I created this package pretty much entirely using ClaudeAI. I described the functionality of what I wanted and when the output of Claude didn't work I just kept providing more and more specific information. I wrote very very little of the final code. I also used it for everything else in the README, this note is the only thing I did. I think this package serves as a good example of where the various LLMs can be used within the programming world. It was a very well defined sepcification, with "strict" requirements imposed on the output of the LLM, and importantly, when it spat out bullshit/generally incorrect behaviour I could tell.*
+
+---
+
 
 ### Classes
 
@@ -124,5 +129,38 @@ if __name__ == "__main__":
         print(f"Caught expected error: {e}")
 
 ```
+
+## Utility Functions
+The package also includes utility functions for working with modalities:
+
+- **create_missing_mask(n: int, m: int, pct_missing: Union[float, List[float], np.ndarray]) -> np.ndarray**: Generates a binary mask representing missing data across multiple modalities and samples.
+
+
+
+## Utility Functions Usage
+
+Here's an example of how to use the `create_missing_mask` function:
+
+```python
+import numpy as np
+from modalities import create_missing_mask
+
+# Create a missing mask for 2 modalities and 5 samples. 
+# Approx. 30% of the data is missing for the first sample and 40% for the second sample.
+mask = create_missing_mask(2, 5, [0.3, 0.4])
+print(mask)
+```
+
+This will output a mask similar to:
+```
+[[1. 1.]
+ [1. 1.]
+ [1. 0.]
+ [0. 1.]
+ [1. 0.]]
+ ```
+
+In this example, we create a mask for 2 modalities and 5 samples, with missing data ratios of 0.3 and 0.4 for the two modalities respectively.
+
 
 For more detailed usage and examples, refer to the documentation in the source code.
