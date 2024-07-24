@@ -9,6 +9,9 @@ Across multimodal literature and specifically within the implementations of mult
 if modality == "audio" ...
 if modality = "t" ...
 if modality == "it" ...
+```
+where modalities are matched on string literals. This can be easy to misuse (depending on how the code parses the modality) and generally could be conveyed in a more uniform and programmatic way. By representing a modality programmatically we can match modalities or combinations easily using native python syntax, allow for functionality to be extended since enums are just classes, catch errors early and more robustly since the Modality enum will fail on invalid modalities, and also there are simply much more verbose and descriptive. 
+```python
 ## vs
 if modality == Modality.AUDIO ...
 if modality == Modality.TEXT ...
@@ -18,8 +21,6 @@ if modality == Modality.IMAGE_TEXT ...
 ## OR
 if modality == Modality.IMAGE | Modality.TEXT ... ## important to not read this as IMAGE or TEXT, but as IMAGE and TEXT. It performs a bitwise OR operation, not the logical OR operation.
 ```
-where modalities are matched on string literals. This can be easy to misuse (depending on how the code parses the modality) and generally could be conveyed in a more uniform and programmatic way. By representing a modality programmatically we can match modalities or combinations easily using native python syntax, allow for functionality to be extended since enums are just classes, catch errors early and more robustly since the Modality enum will fail on invalid modalities, and also there are simply much more verbose and descriptive. 
-
 
 ## Installation
 
@@ -27,6 +28,11 @@ As there already exists a project on PyPi with the name `modalities`, this proje
 
 ```bash
 git clone https://github.com/jmg049/Modalities.git && pip install ./Modalities
+```
+
+**OR**
+```bash
+pip install git+https://github.com/jmg049/Modalities.git
 ```
 
 ## Overview
@@ -158,9 +164,28 @@ This will output a mask similar to:
  [1. 0.]
  [0. 1.]
  [1. 0.]]
- ```
+```
 
 In this example, we create a mask for 2 modalities and 5 samples, with missing data ratios of 0.3 and 0.4 for the two modalities respectively.
 
 
 For more detailed usage and examples, refer to the documentation in the source code.
+
+## Reference
+
+If you use this package in your research, please cite it as follows:
+
+```bibtex
+@software{jmg_modalities,
+  author = {Geraghty, Jack},
+  title = {Modalities: A Python Package for Handling Multimodal Data},
+  year = {2024},
+  url = {https://github.com/jmg049/Modalities},
+}
+```
+
+## Contributing
+If you think of any useful features or changes and wish to contribute please open a pull request and we can discuss it. I always open to collaboration :)
+
+## License
+This project is licensed under the MIT License.
