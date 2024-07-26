@@ -74,10 +74,15 @@ class Modality(IntFlag):
         """
         if self == Modality.INVALID:
             return "INVALID"
-        components = sorted(
-            m.name for m in Modality if m in self and m != Modality.INVALID
-        )
-        return "_".join(components)
+        
+        components = set()
+        for m in Modality:
+            if m in self and m != Modality.INVALID:
+                # Split compound names and add individual components
+                components.update(m.name.split('_'))
+        
+        return "_".join(sorted(components))
+
 
     def __or__(self, other: "Modality") -> "Modality":
         """
