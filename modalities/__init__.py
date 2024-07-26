@@ -74,9 +74,10 @@ class Modality(IntFlag):
         """
         if self == Modality.INVALID:
             return "INVALID"
-        return "_".join(
-            sorted(m.name for m in Modality if m in self and m != Modality.INVALID)
+        components = sorted(
+            m.name for m in Modality if m in self and m != Modality.INVALID
         )
+        return "_".join(components)
 
     def __or__(self, other: "Modality") -> "Modality":
         """
@@ -125,12 +126,15 @@ class Modality(IntFlag):
         return self.__add__(other)
 
 
-def add_modality(name: str, combination: Optional[Modality] = None) -> Modality:
+def add_modality(
+    name: Optional[str] = None, combination: Optional[Modality] = None
+) -> Modality:
     """
     Add a new modality to the Modality enum.
 
     Args:
-        name (str): The name of the new modality.
+        name (Optional[str]): The name of the new modality. If None and combination is provided,
+                              the name will be generated from the combination.
         combination (Optional[Modality]): A combination of existing modalities
                                           to create the new modality. If None,
                                           a new base modality is created.
@@ -143,16 +147,20 @@ def add_modality(name: str, combination: Optional[Modality] = None) -> Modality:
 
     Example:
         >>> video = add_modality("VIDEO")
-        >>> video_text = add_modality("VIDEO_TEXT", video | Modality.TEXT)
+        >>> video_text = add_modality(combination=video | Modality.TEXT)
     """
-    name = name.upper()
-    if name in Modality.__members__:
-        raise ValueError(f"'{name}' already exists as a modality.")
-
     if combination is None:
+        if name is None:
+            raise ValueError("Name must be provided when creating a new base modality.")
         new_value = max(int(m.value) for m in Modality) * 2
     else:
         new_value = combination.value
+        if name is None:
+            name = str(combination)
+
+    name = name.upper()
+    if name in Modality.__members__:
+        raise ValueError(f"'{name}' already exists as a modality.")
 
     new_member = extend_enum(Modality, name, new_value)
     logger.debug(f"Added new modality: {name}")
