@@ -1,3 +1,4 @@
+import time
 from logging import getLogger
 from enum import IntFlag
 from typing import Union, List, Optional
@@ -74,15 +75,14 @@ class Modality(IntFlag):
         """
         if self == Modality.INVALID:
             return "INVALID"
-        
+
         components = set()
         for m in Modality:
             if m in self and m != Modality.INVALID:
                 # Split compound names and add individual components
-                components.update(m.name.split('_'))
-        
-        return "_".join(sorted(components))
+                components.update(m.name.split("_"))
 
+        return "_".join(sorted(components))
 
     def __or__(self, other: "Modality") -> "Modality":
         """
@@ -191,7 +191,10 @@ def process_modality(mod):
 
 
 def create_missing_mask(
-    n: int, m: int, pct_missing: Union[float, List[float], np.ndarray]
+    n: int,
+    m: int,
+    pct_missing: Union[float, List[float], np.ndarray],
+    seed: Optional[int] = None,
 ) -> np.ndarray:
     """
     Generate a mask representing missing data across multiple modalities and samples.
@@ -208,6 +211,8 @@ def create_missing_mask(
     pct_missing : Union[float, List[float], np.ndarray]
         The pct_missing of missing data for each modality. If a single float, the same pct_missing is applied to all modalities.
         If a list or array, it should contain n elements, one for each modality.
+    seed : Optional[int], default=None
+        The random seed to use for reproducibility.
 
     Returns:
     --------
@@ -236,6 +241,11 @@ def create_missing_mask(
            [0., 1., 1.],
            [1., 0., 0.]])
     """
+    if seed is None:
+        seed = int(time.time())
+
+    np.random.seed(seed=seed)
+
     if isinstance(pct_missing, (float, int)):
         pct_missing = [pct_missing] * n
 
