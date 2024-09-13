@@ -84,6 +84,9 @@ class Modality(IntFlag):
 
         return "_".join(sorted(components))
 
+    def __repr__(self) -> str:
+        return f"Modality({self.__str__()})"
+
     def __or__(self, other: "Modality") -> "Modality":
         """
         Combine two Modality instances using bitwise OR.
