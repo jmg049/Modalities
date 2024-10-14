@@ -138,7 +138,7 @@ def add_modality(
     name: Optional[str] = None, combination: Optional[Modality] = None
 ) -> Modality:
     """
-    Add a new modality to the Modality enum.
+    Add a new modality to the Modality enum. If it already exists, it will just return it.
 
     Args:
         name (Optional[str]): The name of the new modality. If None and combination is provided,
@@ -149,9 +149,6 @@ def add_modality(
 
     Returns:
         Modality: The newly created Modality instance.
-
-    Raises:
-        ValueError: If the modality name already exists.
 
     Example:
         >>> video = add_modality("VIDEO")
@@ -168,7 +165,7 @@ def add_modality(
 
     name = name.upper()
     if name in Modality.__members__:
-        raise ValueError(f"'{name}' already exists as a modality.")
+        return  Modality[name]
 
     new_member = extend_enum(Modality, name, new_value)
     logger.debug(f"Added new modality: {name}")

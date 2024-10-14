@@ -87,10 +87,4 @@ if __name__ == "__main__":
     )
     print(process_modality(super_combo))
 
-    # Test invalid combination
-    try:
-        invalid_combo = add_modality(
-            "IMAGE_TEXT", Modality.IMAGE | Modality.TEXT
-        )  # This should raise an error
-    except ValueError as e:
-        print(f"Caught expected error: {e}")
+    add_modality("VIDEO")
