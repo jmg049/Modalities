@@ -193,7 +193,7 @@ def process_modality(mod):
 def create_missing_mask(
     n: int,
     m: int,
-    pct_missing: float | List[float] | np.ndarray],
+    pct_missing: float | List[float] | np.ndarray,
     seed: Optional[int] = None,
 ) -> np.ndarray:
     """
